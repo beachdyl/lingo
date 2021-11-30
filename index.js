@@ -38,25 +38,22 @@ try {
 
 // Process text messages sent in the correct channel
 client.on("messageCreate", message => {
-	if (channelId == message.channel.id) {
-		let aWord;
-		isWord(message.content, client)
-		.then(val => {
-			aWord = val;
+	if (channelId !== message.channel.id) return;
 
-			switch (aWord) {
-				case 1:
-					console.log(message.content+' is a word');
-					break;
-				case 0:
-					console.log(message.content+' is not a word');
-					break;
-				default:
-					errHandle(`Evaluation of whether or not ${message.content} is a word returned ${aWord}`, 1, client)
-			};
-		});
-		
-	};
+	let aWord;
+	isWord(message.content, client)
+	.then(val => {
+		switch (val) {
+			case 1:
+				console.log(message.content+' is a word');
+				break;
+			case 0:
+				console.log(message.content+' is not a word');
+				break;
+			default:
+				errHandle(`Evaluation of whether or not ${message.content} is a word returned ${val}`, 1, client)
+		};
+	});
 });
 
 // Process slash command interactions
