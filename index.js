@@ -39,28 +39,31 @@ try {
 //console.log(client.commands);
 
 // Process text messages sent in the correct channel
-client.on("messageCreate", async message => {
+client.on("messageCreate", message => {
 	if (channelId == message.channel.id) console.log(message.content);
-	const searchStream = message => {
-
-		return new Promise((resolve) => {
-			const inStream = fs.createReadStream('./files/US.txt');
-			const outStream = new stream;
-			const rl = readline.createInterface(inStream, outStream);
-			const result = [];
-			const regEx = new RegExp(message.content, "i")
-			rl.on('line', function (line) {
-				if (line && line.search(regEx) >= 0) {
-					result.push(line)
-				}
-			});
-			rl.on('close', function () {
-				console.log('finished search')
-				resolve(result)
-			});
-		})
-	}
-  });
+	console.log('test1');
+	console.log('test2');
+	return new Promise((resolve) => {
+		console.log('test3');
+		const inStream = fs.createReadStream('./files/US.txt');
+		const outStream = new stream;
+		console.log('test4');
+		const rl = readline.createInterface(inStream, outStream);
+		const result = [];
+		const regEx = new RegExp(message.content, "i")
+		rl.on('line', function (line) {
+			if (line && line.search(regEx) >= 0) {
+				result.push(line);
+				console.log('test5');
+			}
+		});
+		rl.on('close', function () {
+			console.log('finished search');
+			resolve(result);
+		});
+		
+	});
+});
 
 // Process slash command interactions
 client.on('interactionCreate', async interaction => {
