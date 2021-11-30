@@ -3,7 +3,7 @@ const fs = require('fs');
 const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
 const { token, clientId, guildId, channelId, devChannelId } = require('./config.json');
 const errHandle = require('./errorHandler.js');
-const { isWord } = require('./functions.js');
+const isWord = require('./functions.js');
 
 // Try deleting old errorTemp.txt if it exists
 try {fs.unlinkSync('./errorTemp.txt');}
@@ -39,13 +39,23 @@ try {
 // Process text messages sent in the correct channel
 client.on("messageCreate", message => {
 	if (channelId == message.channel.id) {
-		if (isWord(message.content, client) == 1) {
-			console.log(message.content+' is a word');
-		} else if (isWord(message.content, client) == 0 ) {
-			console.log(message.content+' is not a word');
-		} else {
-			errHandle(`Evaluation of whether or not ${message.content} is a word returned ${isWord(message.content, client)}`, 1, client)
-		};
+		let aWord;
+		isWord(message.content, client)
+		.then(val => {
+			aWord = val;
+
+			switch (aWord) {
+				case 1:
+					console.log(message.content+' is a word');
+					break;
+				case 0:
+					console.log(message.content+' is not a word');
+					break;
+				default:
+					errHandle(`Evaluation of whether or not ${message.content} is a word returned ${aWord}`, 1, client)
+			};
+		});
+		
 	};
 });
 
