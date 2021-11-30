@@ -1,7 +1,8 @@
 // Require the necessary discord.js classes
 const fs = require('fs');
-const { Client, Collection, Intents } = require('discord.js');
-const { token, clientId, guildId, channelId } = require('./config.json');
+const search = require('search-in-file');
+const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
+const { token, clientId, guildId, channelId, devChannelId } = require('./config.json');
 const errHandle = require ('./errorHandler.js')
 
 // Try deleting old errorTemp.txt if it exists
@@ -80,6 +81,15 @@ client.on('interactionCreate', interaction => {
 client.on('ready', () => {
 	// Set the bot status to online
 	client.user.setPresence({status: 'online'});
+
+	// Send a good morning embed
+	const readyEmbed = new MessageEmbed()
+	.setColor('#00ff00')
+	.setTitle('Ready to rock and roll!')
+	//.setAuthor('Lingo', 'https://i.ibb.co/cDrSdS5/PF-Flame.png', 'https://beachdyl.com')
+	.setDescription('I was asleep, but I am no longer asleep! To make a long story short, ~~I put a whole bag of jellybeans~~ **good morning**!')
+	.setTimestamp();
+	client.channels.cache.get(devChannelId).send({embeds: [readyEmbed] });
 
 	// Check for persistent errors
 	try {

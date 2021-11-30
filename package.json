@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/beachdyl/lingo#readme",
   "dependencies": {
-    "discord.js": "^13.3.1"
+    "discord.js": "^13.3.1",
+    "search-in-file": "^1.2.2"
   }
 }
