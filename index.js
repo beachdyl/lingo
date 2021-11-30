@@ -3,7 +3,7 @@ const fs = require('fs');
 const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
 const { token, clientId, guildId, channelId, devChannelId } = require('./config.json');
 const errHandle = require('./errorHandler.js');
-const isWord = require('./functions.js');
+const { matchWord, matchUsed, correctWord } = require('./functions.js');
 
 // Try deleting old errorTemp.txt if it exists
 try {fs.unlinkSync('./errorTemp.txt');}
@@ -11,7 +11,7 @@ catch (error) {}
 
 // Create a new client instance
 const client = new Client({
-	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
 	presence: {
 		activity: {
 			type: "PLAYING", name: "with a dictionary"
@@ -40,18 +40,47 @@ try {
 client.on("messageCreate", message => {
 	if (channelId !== message.channel.id) return;
 
-	let aWord;
-	isWord(message.content, client)
-	.then(val => {
-		switch (val) {
+	let isWord;
+	let isNew;
+
+	// See if the word is in the dictionary
+	matchWord(message.content)
+	.then(val1 => {
+		switch (val1) {
 			case 1:
 				console.log(message.content+' is a word');
+				isWord = true;
+
+				// Given that it is a word, see if the word has been used before
+				matchUsed(message.content)
+				.then(val2 => {
+					switch (val2) {
+						case 1:
+							console.log(message.content+' has been used');
+							isNew = false;
+							break;
+						case 0:
+							console.log(message.content+' has not been used');
+							isNew = true;
+
+							// Given that it is new and real, process it as a correct submission
+							correctWord(message, client);
+
+							break;
+						default:
+							errHandle(`Evaluation of whether or not ${message.content} has been used returned ${val}`, 1, client);
+							isNew = false;
+					};
+				});
+
 				break;
 			case 0:
 				console.log(message.content+' is not a word');
+				isWord = false;
 				break;
 			default:
-				errHandle(`Evaluation of whether or not ${message.content} is a word returned ${val}`, 1, client)
+				errHandle(`Evaluation of whether or not ${message.content} is a word returned ${val}`, 1, client);
+				isWord = false;
 		};
 	});
 });
