@@ -1,6 +1,7 @@
 // Require the necessary discord.js classes
 const fs = require('fs');
-const search = require('search-in-file');
+const readline = require('readline');
+const stream = require('stream');
 const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
 const { token, clientId, guildId, channelId, devChannelId } = require('./config.json');
 const errHandle = require ('./errorHandler.js')
@@ -37,8 +38,28 @@ try {
 }
 //console.log(client.commands);
 
+// Process text messages sent in the correct channel
 client.on("messageCreate", async message => {
 	if (channelId == message.channel.id) console.log(message.content);
+	const searchStream = message => {
+
+		return new Promise((resolve) => {
+			const inStream = fs.createReadStream('./files/US.txt');
+			const outStream = new stream;
+			const rl = readline.createInterface(inStream, outStream);
+			const result = [];
+			const regEx = new RegExp(message.content, "i")
+			rl.on('line', function (line) {
+				if (line && line.search(regEx) >= 0) {
+					result.push(line)
+				}
+			});
+			rl.on('close', function () {
+				console.log('finished search')
+				resolve(result)
+			});
+		})
+	}
   });
 
 // Process slash command interactions
