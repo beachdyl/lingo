@@ -40,28 +40,30 @@ try {
 
 // Process text messages sent in the correct channel
 client.on("messageCreate", message => {
-	if (channelId == message.channel.id) console.log(message.content);
+	if (channelId !== message.channel.id) return;
+	console.log(message.content);
 	console.log('test1');
-	console.log('test2');
-	return new Promise((resolve) => {
-		console.log('test3');
-		const inStream = fs.createReadStream('./files/US.txt');
-		const outStream = new stream;
-		console.log('test4');
-		const rl = readline.createInterface(inStream, outStream);
-		const result = [];
-		const regEx = new RegExp(message.content, "i")
-		rl.on('line', function (line) {
-			if (line && line.search(regEx) >= 0) {
-				result.push(line);
-				console.log('test5');
-			}
-		});
-		rl.on('close', function () {
-			console.log('finished search');
-			resolve(result);
-		});
-		
+	new Promise((resolve) => {
+		console.log('test2', message.content);
+        const regEx = new RegExp(message.content, "i")
+        const result = [];
+
+        fs.readFile('files/US.txt', 'utf8', function (err, contents) {
+            console.log(err)
+            let lines = contents.toString().split("\n");
+            lines.forEach(line => {
+                if (line && line.search(regEx) >= 0) {
+                    console.log('found in file ')
+                    result.push(line)
+                }
+            })
+            console.log('finished search');
+            resolve(result);
+        })
+    }).then(value => {
+		console.log('test3', value);
+	}, reason => {
+		console.log('test4', reason);
 	});
 });
 
