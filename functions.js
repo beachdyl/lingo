@@ -50,20 +50,50 @@ let matchUsed = async function(word) {
     return length;
 };
 
-let correctWord = async function(message, client) {
+let whoSaid = async function(word) {
+    let answer = await new Promise((resolve) => {
+        const regEx = new RegExp('\\b'+word+'\\b', "i")
+        const result = [];
 
+        // Scan the file for the word
+        fs.readFile('./files/Used.txt', 'utf8', function (err, contents) {
+            let lines = contents.toString().split("\n");
+            lines.forEach(line => {
+                if (line && line.search(regEx) >= 0) {
+                    result.push(line);
+                }
+            })
+            resolve(result);
+        })
+    });
+    return answer;
+};
 
+let correctWord = async function(message) {
     console.log('congrats '+message.author.username);
-    //await new Promise (function(resolve) {setTimeout(resolve, 200);});
-    client.channels.cache.get(channelId).lastMessage.react('✅');
+    message.react('✅');
+    fs.appendFileSync('./files/Used.txt',`${message.content} ${message.author.id}\n`);
 };
 
-let incorrectWord = async function(message, client) {
-
-
+let deleteWord = async function(message) {
     console.log('fool '+message.author.username);
-    client.channels.cache.get(channelId).lastMessage.react('❌');
-    await new Promise (function(resolve) {setTimeout(resolve, 1000);});
+    message.react('❓');
+    await new Promise (function(resolve) {setTimeout(resolve, 2700);});
+    message.delete();
+    fs.appendFileSync('./files/Wrong.txt',`${message.content} ${message.author.id}\n`);
 };
 
-module.exports = { matchWord, matchUsed, correctWord} ;
+let wrongWord = async function(message) {
+    console.log('fool '+message.author.username);
+    message.react('❌');
+    whoSaid(message.content)
+    .then(val => {
+        console.log(val);
+        val = val[0];
+        console.log(val);
+        val = val.substring(val.indexOf(" ")+1, val.length-1)
+        let message2 = message.reply({ content: `That word has already been said by <@${val}>!`, ephemeral: true });
+    });
+};
+
+module.exports = { matchWord, matchUsed, correctWord, deleteWord, wrongWord, whoSaid } ;

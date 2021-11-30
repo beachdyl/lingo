@@ -3,7 +3,7 @@ const fs = require('fs');
 const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
 const { token, clientId, guildId, channelId, devChannelId } = require('./config.json');
 const errHandle = require('./errorHandler.js');
-const { matchWord, matchUsed, correctWord } = require('./functions.js');
+const { matchWord, matchUsed, correctWord, wrongWord, deleteWord } = require('./functions.js');
 
 // Try deleting old errorTemp.txt if it exists
 try {fs.unlinkSync('./errorTemp.txt');}
@@ -36,12 +36,10 @@ try {
 	}
 }
 
-// Process text messages sent in the correct channel
+// Process text messages
 client.on("messageCreate", message => {
-	if (channelId !== message.channel.id) return;
-
-	let isWord;
-	let isNew;
+	if (channelId !== message.channel.id) return; // Only in the right channel
+	if (message.author.bot) return; // Ignore bots
 
 	// See if the word is in the dictionary
 	matchWord(message.content)
@@ -49,7 +47,6 @@ client.on("messageCreate", message => {
 		switch (val1) {
 			case 1:
 				console.log(message.content+' is a word');
-				isWord = true;
 
 				// Given that it is a word, see if the word has been used before
 				matchUsed(message.content)
@@ -57,30 +54,25 @@ client.on("messageCreate", message => {
 					switch (val2) {
 						case 1:
 							console.log(message.content+' has been used');
-							isNew = false;
+							wrongWord(message);
 							break;
 						case 0:
 							console.log(message.content+' has not been used');
-							isNew = true;
-
-							// Given that it is new and real, process it as a correct submission
-							correctWord(message, client);
+							correctWord(message);
 
 							break;
 						default:
 							errHandle(`Evaluation of whether or not ${message.content} has been used returned ${val}`, 1, client);
-							isNew = false;
 					};
 				});
 
 				break;
 			case 0:
 				console.log(message.content+' is not a word');
-				isWord = false;
+				deleteWord(message);
 				break;
 			default:
 				errHandle(`Evaluation of whether or not ${message.content} is a word returned ${val}`, 1, client);
-				isWord = false;
 		};
 	});
 });
