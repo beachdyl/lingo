@@ -1,2 +1,0 @@
-Logged in
-Evaluation of whether or not hi is a word returned [object Promise]
