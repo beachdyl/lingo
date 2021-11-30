@@ -5,3 +5,5 @@ config.json
 error.txt
 tempError.txt
 persistError.txt
+files/Used.txt
+files/Wrong.txt
