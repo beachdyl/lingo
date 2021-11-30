@@ -53,7 +53,7 @@ let matchUsed = async function(word) {
 let whoSaid = async function(word) {
     let answer = await new Promise((resolve) => {
         const regEx = new RegExp('\\b'+word+'\\b', "i")
-        const result = [];
+        let result = [];
 
         // Scan the file for the word
         fs.readFile('./files/Used.txt', 'utf8', function (err, contents) {
@@ -63,6 +63,8 @@ let whoSaid = async function(word) {
                     result.push(line);
                 }
             })
+            result = result[0];
+            result = result.substring(result.indexOf(" ")+1, result.length);
             resolve(result);
         })
     });
@@ -86,14 +88,6 @@ let deleteWord = async function(message) {
 let wrongWord = async function(message) {
     console.log('fool '+message.author.username);
     message.react('❌');
-    whoSaid(message.content)
-    .then(val => {
-        console.log(val);
-        val = val[0];
-        console.log(val);
-        val = val.substring(val.indexOf(" ")+1, val.length-1)
-        let message2 = message.reply({ content: `That word has already been said by <@${val}>!`, ephemeral: true });
-    });
 };
 
 module.exports = { matchWord, matchUsed, correctWord, deleteWord, wrongWord, whoSaid } ;
