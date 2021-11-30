@@ -1,10 +1,9 @@
 // Require the necessary discord.js classes
 const fs = require('fs');
-const readline = require('readline');
-const stream = require('stream');
 const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
 const { token, clientId, guildId, channelId, devChannelId } = require('./config.json');
-const errHandle = require ('./errorHandler.js')
+const errHandle = require('./errorHandler.js');
+const { isWord } = require('./functions.js');
 
 // Try deleting old errorTemp.txt if it exists
 try {fs.unlinkSync('./errorTemp.txt');}
@@ -36,35 +35,18 @@ try {
 		errHandle(`Command registration of unknown command\n${error}`, 1, client);
 	}
 }
-//console.log(client.commands);
 
 // Process text messages sent in the correct channel
 client.on("messageCreate", message => {
-	if (channelId !== message.channel.id) return;
-	console.log(message.content);
-	console.log('test1');
-	new Promise((resolve) => {
-		console.log('test2', message.content);
-        const regEx = new RegExp(message.content, "i")
-        const result = [];
-
-        fs.readFile('files/US.txt', 'utf8', function (err, contents) {
-            console.log(err)
-            let lines = contents.toString().split("\n");
-            lines.forEach(line => {
-                if (line && line.search(regEx) >= 0) {
-                    console.log('found in file ')
-                    result.push(line)
-                }
-            })
-            console.log('finished search');
-            resolve(result);
-        })
-    }).then(value => {
-		console.log('test3', value);
-	}, reason => {
-		console.log('test4', reason);
-	});
+	if (channelId == message.channel.id) {
+		if (isWord(message.content, client) == 1) {
+			console.log(message.content+' is a word');
+		} else if (isWord(message.content, client) == 0 ) {
+			console.log(message.content+' is not a word');
+		} else {
+			errHandle(`Evaluation of whether or not ${message.content} is a word returned ${isWord(message.content, client)}`, 1, client)
+		};
+	};
 });
 
 // Process slash command interactions
@@ -86,7 +68,7 @@ client.on('interactionCreate', async interaction => {
 	} catch (error) {
 		try {
 			errHandle(`Interaction named ${interaction.commandName}\n${error}`, 1, client);
-			await interaction.reply({ content: 'There was an error while executing this command! Please alert a Dylan.', ephemeral: true });
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 		} catch (error) {
 			try {
 				errHandle(`Error of interaction named ${interaction.commandName}\n${error}`, 5, client);
