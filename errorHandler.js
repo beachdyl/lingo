@@ -34,10 +34,10 @@ let errHandle = function(error, type, client) {
 	if (type !== 8) fs.writeFileSync('./error.txt',`${type_table[type]}\n${error}`);
 
 	if (type === 2 || type === 4 || type === 6) {
-		fs.appendFileSync('./tempError.txt',`${type_table[type]}\n${error}`);
+		fs.appendFileSync('./tempError.txt',`${type_table[type]}\n${error}\n`);
 	};
 	if (type === 4 || type === 6) {
-		fs.appendFileSync('./persistError.txt',`${type_table[type]}\n${error}`);
+		fs.appendFileSync('./persistError.txt',`${type_table[type]}\n${error}\n`);
 	};
 	if (type === 3) {
 		fs.unlinkSync('./tempError.txt');
